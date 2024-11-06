@@ -33,8 +33,8 @@ class FileCard extends StatelessWidget {
         children: [
           Image.file(
             File(imagePath),
-            height: 80,
-            width: 80,
+            height: 60,
+            width: 70,
           ),
           const SizedBox(width: 16),
           Expanded(
