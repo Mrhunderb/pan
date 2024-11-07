@@ -1,3 +1,4 @@
+import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:pan/services/oss.dart';
 import 'package:pan/widgets/file_card.dart';
@@ -14,14 +15,12 @@ class PanFilePage extends StatefulWidget {
 
 class _PanFilePage extends State<PanFilePage> {
   late Future<List<Object>> _files;
-  late Future<int> _fileCount;
   late Future<List<String>> _folders;
 
   @override
   void initState() {
     super.initState();
     _files = OssService.listFiles();
-    _fileCount = OssService.fileCount();
     _folders = OssService.listFolders();
   }
 
@@ -32,61 +31,31 @@ class _PanFilePage extends State<PanFilePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            FileCard(
-              fileName: "头号玩家.mp4",
-              isFolder: true,
-            ),
-            FileCard(
-              fileName: "头号玩家.mp4",
-              isFolder: true,
-            ),
-            FileCard(
-              fileName: "头号玩家.mkv",
-              fileSize: "1.2GB",
-              createdTime: DateTime.now(),
-              isFolder: false,
-            ),
-            FileCard(
-              fileName: "头号玩家.txt",
-              fileSize: "1.2GB",
-              createdTime: DateTime.now(),
-              isFolder: false,
-            ),
-            FileCard(
-              fileName: "头号玩家.pdf",
-              fileSize: "1.2GB",
-              createdTime: DateTime.now(),
-              isFolder: false,
-            ),
-            FileCard(
-              fileName: "头号玩家.jpg",
-              fileSize: "1.2GB",
-              createdTime: DateTime.now(),
-              isFolder: false,
-            ),
-            FutureBuilder<int>(
-              future: _fileCount,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return FileCard(
-                    fileName: '${snapshot.data} files',
-                    fileSize: "1.2GB",
-                    createdTime: DateTime.now(),
-                    isFolder: false,
-                  );
-                }
-              },
-            ),
-          ],
-        ),
+      body: FutureBuilder<List<dynamic>>(
+        future: Future.wait([_files, _folders]),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          List<Object> files = snapshot.data![0];
+          List<String> folders = snapshot.data![1];
+          return ListView(
+            children: [
+              for (var folder in folders)
+                FileCard(
+                  fileName: folder.runes.string,
+                  isFolder: true,
+                ),
+              for (var file in files)
+                FileCard(
+                  fileName: file.key!,
+                  fileSize: filesize(file.size!),
+                  createdTime: file.lastModified,
+                  isFolder: false,
+                ),
+            ],
+          );
+        },
       ),
     );
   }
