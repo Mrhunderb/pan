@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:minio/io.dart';
 import 'package:minio/minio.dart';
 import 'package:minio/models.dart';
+import 'package:path_provider/path_provider.dart';
 
 class OssService {
   static const String bucketName = 'pan';
@@ -78,7 +81,14 @@ class OssService {
     return folders;
   }
 
-  static Future<Stream<List<int>>> downloadFile(String objectName) async {
-    return minio.getObject(bucketName, objectName);
+  static Future<void> downloadFile(String objectName, String path) async {
+    await minio.fGetObject(bucketName, objectName, path);
+  }
+
+  static Future<String> downloadFileInTemp(String objectName) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String path = '${tempDir.path}/$objectName';
+    await minio.fGetObject(bucketName, objectName, path);
+    return path;
   }
 }
