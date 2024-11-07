@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pan/screens/pan.dart';
 
-class FileCard extends StatelessWidget {
+class FileCard extends StatefulWidget {
   final String path;
   final String? fileSize;
   final DateTime? createdTime;
   final bool isFolder;
 
-  FileCard({
+  const FileCard({
     super.key,
     required this.path,
     this.fileSize,
@@ -15,10 +16,15 @@ class FileCard extends StatelessWidget {
     required this.isFolder,
   });
 
-  String get fileSuffix => path.split('.').last;
-  String get fileName => isFolder
-      ? path.split('/')[path.split('/').length - 2]
-      : path.split('/').last;
+  @override
+  State<FileCard> createState() => _FileCardState();
+}
+
+class _FileCardState extends State<FileCard> {
+  String get fileSuffix => widget.path.split('.').last;
+  String get fileName => widget.isFolder
+      ? widget.path.split('/')[widget.path.split('/').length - 2]
+      : widget.path.split('/').last;
 
   final Map<String, String> _fileTypeToImagePath = {
     'pdf': 'assets/pdf.png',
@@ -44,60 +50,100 @@ class FileCard extends StatelessWidget {
   };
 
   String get imagePath {
-    if (isFolder) {
+    if (widget.isFolder) {
       return _fileTypeToImagePath['folder']!;
     }
     final String type = _suffixToType[fileSuffix] ?? 'file';
     return _fileTypeToImagePath[type]!;
   }
 
+  bool _isPressed = false;
+
+  void _onTap(BuildContext context) {
+    if (widget.isFolder) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PanFilePage(
+            title: widget.path,
+            prefix: widget.path,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() {
+      _isPressed = true;
+    });
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    setState(() {
+      _isPressed = false;
+    });
+  }
+
+  void _onTapCancel() {
+    setState(() {
+      _isPressed = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String formattedDate = createdTime != null
-        ? DateFormat('yyyy/MM/dd HH:mm:ss').format(createdTime!)
+    final String formattedDate = widget.createdTime != null
+        ? DateFormat('yyyy/MM/dd HH:mm:ss').format(widget.createdTime!)
         : '';
 
     return Container(
       padding: const EdgeInsets.all(12.0),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isPressed ? Colors.grey[200] : Colors.white,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Row(
-        children: [
-          Image.asset(
-            imagePath,
-            height: 35,
-            width: 45,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fileName.length > 20
-                      ? '${fileName.substring(0, 20)}...'
-                      : fileName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (!isFolder)
+      child: InkWell(
+        onTap: () => _onTap(context),
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
+        child: Row(
+          children: [
+            Image.asset(
+              imagePath,
+              height: 35,
+              width: 45,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    '$formattedDate · $fileSize',
+                    fileName.length > 20
+                        ? '${fileName.substring(0, 20)}...'
+                        : fileName,
                     style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-              ],
+                  const SizedBox(height: 4),
+                  if (!widget.isFolder)
+                    Text(
+                      '$formattedDate · ${widget.fileSize}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
