@@ -77,4 +77,8 @@ class OssService {
     }
     return folders;
   }
+
+  static Future<Stream<List<int>>> downloadFile(String objectName) async {
+    return minio.getObject(bucketName, objectName);
+  }
 }

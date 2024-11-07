@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pan/screens/pan.dart';
+import 'package:pan/screens/picture_view.dart';
 
 class FileCard extends StatefulWidget {
   final String path;
@@ -67,6 +68,15 @@ class _FileCardState extends State<FileCard> {
           builder: (context) => PanFilePage(
             title: widget.path,
             prefix: widget.path,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PictureView(
+            picturePath: widget.path,
           ),
         ),
       );
