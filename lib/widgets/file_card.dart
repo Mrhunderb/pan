@@ -6,15 +6,16 @@ class FileCard extends StatelessWidget {
   final String? fileSize;
   final DateTime? createdTime;
   final bool isFolder;
-  String get fileSuffix => fileName.split('.').last;
 
   FileCard({
     super.key,
     required this.fileName,
-    required this.fileSize,
-    required this.createdTime,
+    this.fileSize,
+    this.createdTime,
     required this.isFolder,
   });
+
+  String get fileSuffix => fileName.split('.').last;
 
   final Map<String, String> _fileTypeToImagePath = {
     'pdf': 'assets/pdf.png',
@@ -49,8 +50,9 @@ class FileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String formattedDate =
-        DateFormat('yyyy/MM/dd HH:mm:ss').format(createdTime!);
+    final String formattedDate = createdTime != null
+        ? DateFormat('yyyy/MM/dd HH:mm:ss').format(createdTime!)
+        : '';
 
     return Container(
       padding: const EdgeInsets.all(12.0),
