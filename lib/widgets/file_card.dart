@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class FileCard extends StatelessWidget {
-  final String fileName;
+  final String path;
   final String? fileSize;
   final DateTime? createdTime;
   final bool isFolder;
 
   FileCard({
     super.key,
-    required this.fileName,
+    required this.path,
     this.fileSize,
     this.createdTime,
     required this.isFolder,
   });
 
-  String get fileSuffix => fileName.split('.').last;
+  String get fileSuffix => path.split('.').last;
+  String get fileName => isFolder
+      ? path.split('/')[path.split('/').length - 2]
+      : path.split('/').last;
 
   final Map<String, String> _fileTypeToImagePath = {
     'pdf': 'assets/pdf.png',

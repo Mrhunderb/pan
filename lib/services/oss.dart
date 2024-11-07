@@ -5,7 +5,7 @@ import 'package:minio/models.dart';
 
 class OssService {
   static const String bucketName = 'pan';
-  static const String endPoint = 'localhost';
+  static const String endPoint = '10.111.23.47';
   static const int port = 9000;
   static const String accessKey = '6UQmclxevHd1Mbu8m4xD';
   static const String secretKey = 'gujzJMv5N54Q8M4CtByn9qvUzadKG8qS6V4R3ULu';

@@ -5,9 +5,13 @@ import 'package:pan/widgets/file_card.dart';
 import 'package:minio/models.dart';
 
 class PanFilePage extends StatefulWidget {
-  const PanFilePage({super.key, required this.title});
-
   final String title;
+  final String prefix;
+  const PanFilePage({
+    super.key,
+    required this.title,
+    required this.prefix,
+  });
 
   @override
   State<PanFilePage> createState() => _PanFilePage();
@@ -20,8 +24,8 @@ class _PanFilePage extends State<PanFilePage> {
   @override
   void initState() {
     super.initState();
-    _files = OssService.listFiles();
-    _folders = OssService.listFolders();
+    _files = OssService.listFiles(widget.prefix);
+    _folders = OssService.listFolders(widget.prefix);
   }
 
   @override
@@ -36,6 +40,8 @@ class _PanFilePage extends State<PanFilePage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           List<Object> files = snapshot.data![0];
           List<String> folders = snapshot.data![1];
@@ -43,12 +49,12 @@ class _PanFilePage extends State<PanFilePage> {
             children: [
               for (var folder in folders)
                 FileCard(
-                  fileName: folder.runes.string,
+                  path: folder.runes.string,
                   isFolder: true,
                 ),
               for (var file in files)
                 FileCard(
-                  fileName: file.key!,
+                  path: file.key!,
                   fileSize: filesize(file.size!),
                   createdTime: file.lastModified,
                   isFolder: false,
