@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:intl/intl.dart';
 import 'package:pan/screens/pan.dart';
+import 'package:pan/screens/pdf_view.dart';
 import 'package:pan/screens/picture_view.dart';
+import 'package:pan/screens/unable_view.dart';
 
 class FileCard extends StatefulWidget {
   final String path;
@@ -50,11 +53,14 @@ class _FileCardState extends State<FileCard> {
     'avi': 'video',
   };
 
-  String get imagePath {
+  String get type {
     if (widget.isFolder) {
-      return _fileTypeToImagePath['folder']!;
+      return 'folder';
     }
-    final String type = _suffixToType[fileSuffix] ?? 'file';
+    return _suffixToType[fileSuffix] ?? 'file';
+  }
+
+  String get imagePath {
     return _fileTypeToImagePath[type]!;
   }
 
@@ -75,9 +81,18 @@ class _FileCardState extends State<FileCard> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PictureView(
-            picturePath: widget.path,
-          ),
+          builder: (context) {
+            switch (type) {
+              case 'image':
+                return PictureView(picturePath: widget.path);
+              case 'pdf':
+                return PdfView(pdfPath: widget.path);
+              case 'doc':
+                return const UnableView();
+              default:
+                return const UnableView();
+            }
+          },
         ),
       );
     }

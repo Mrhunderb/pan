@@ -1,35 +1,34 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:pan/services/oss.dart';
-import 'package:photo_view/photo_view.dart';
 
-class PictureView extends StatefulWidget {
-  final String picturePath;
+class PdfView extends StatefulWidget {
+  final String pdfPath;
 
-  const PictureView({super.key, required this.picturePath});
+  const PdfView({super.key, required this.pdfPath});
 
   @override
-  State<PictureView> createState() => _PictureViewState();
+  State<PdfView> createState() => _PdfViewState();
 }
 
-class _PictureViewState extends State<PictureView> {
-  late final String pictureName;
+class _PdfViewState extends State<PdfView> {
+  late final String pdfName;
 
   @override
   void initState() {
     super.initState();
-    pictureName = widget.picturePath.split('/').last;
+    pdfName = widget.pdfPath.split('/').last;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Picture View'),
+        title: const Text('PDF View'),
       ),
       body: Center(
         child: FutureBuilder(
-          future: OssService.downloadFileInTemp(widget.picturePath),
+          future: OssService.downloadFileInTemp(widget.pdfPath),
           builder: (context, futureSnapshot) {
             if (futureSnapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
@@ -37,8 +36,8 @@ class _PictureViewState extends State<PictureView> {
               return Text('Error: ${futureSnapshot.error}');
             }
             final localPath = futureSnapshot.data as String;
-            return PhotoView(
-              imageProvider: FileImage(File(localPath)),
+            return PDFView(
+              filePath: localPath,
             );
           },
         ),
