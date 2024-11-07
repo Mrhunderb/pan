@@ -74,7 +74,9 @@ class FileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  fileName,
+                  fileName.length > 20
+                      ? '${fileName.substring(0, 20)}...'
+                      : fileName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
