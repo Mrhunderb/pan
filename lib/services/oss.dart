@@ -91,4 +91,8 @@ class OssService {
     await minio.fGetObject(bucketName, objectName, path);
     return path;
   }
+
+  static Future<String> getFileUrl(String objectName) async {
+    return minio.presignedGetObject(bucketName, objectName);
+  }
 }
