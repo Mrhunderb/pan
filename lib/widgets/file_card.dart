@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:intl/intl.dart';
 import 'package:pan/screens/pan.dart';
 import 'package:pan/screens/pdf_view.dart';
 import 'package:pan/screens/picture_view.dart';
 import 'package:pan/screens/unable_view.dart';
+import 'package:pan/screens/video_view.dart';
 
 class FileCard extends StatefulWidget {
   final String path;
@@ -87,8 +87,8 @@ class _FileCardState extends State<FileCard> {
                 return PictureView(picturePath: widget.path);
               case 'pdf':
                 return PdfView(pdfPath: widget.path);
-              case 'doc':
-                return const UnableView();
+              case 'video':
+                return VideoView(videoPath: widget.path);
               default:
                 return const UnableView();
             }

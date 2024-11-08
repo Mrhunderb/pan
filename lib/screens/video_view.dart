@@ -1,8 +1,11 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:pan/services/oss.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoView extends StatefulWidget {
-  const VideoView({super.key});
+  final String videoPath;
+  const VideoView({super.key, required this.videoPath});
 
   @override
   State<VideoView> createState() => _VideoViewState();
@@ -10,16 +13,23 @@ class VideoView extends StatefulWidget {
 
 class _VideoViewState extends State<VideoView> {
   late VideoPlayerController _controller;
+  late String _videoUrl;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(
-          'http://10.111.23.47:9000/pan/%5BNekomoe%20kissaten&LoliHouse%5D%20Gimai%20Seikatsu%20-%2002%20%5BWebRip%201080p%20HEVC-10bit%20AAC%20ASSx2%5D.mkv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=6UQmclxevHd1Mbu8m4xD%2F20241107%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20241107T151735Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=68a460dc9487a2e0366cf28232cec60f651e5849f8e0e3465589b4083727f3ac'),
-    )..initialize().then((_) {
-        setState(
-            () {}); // Ensure the first frame is shown after the video is initialized
+    _initializeVideo();
+  }
+
+  void _initializeVideo() async {
+    _controller = VideoPlayerController.networkUrl(Uri.parse(''))
+      ..initialize().then((_) {
+        setState(() {});
+      });
+    _videoUrl = await OssService.getFileUrl(widget.videoPath);
+    _controller = VideoPlayerController.networkUrl(Uri.parse(_videoUrl))
+      ..initialize().then((_) {
+        setState(() {});
       });
   }
 
@@ -37,23 +47,14 @@ class _VideoViewState extends State<VideoView> {
       ),
       body: Center(
         child: _controller.value.isInitialized
-            ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+            ? Chewie(
+                controller: ChewieController(
+                  videoPlayerController: _controller,
+                  autoPlay: true,
+                  looping: true,
+                ),
               )
             : const CircularProgressIndicator(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _controller.value.isPlaying
-                ? _controller.pause()
-                : _controller.play();
-          });
-        },
-        child: Icon(
-          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        ),
       ),
     );
   }
