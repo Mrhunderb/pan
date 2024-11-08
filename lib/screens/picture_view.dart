@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pan/services/oss.dart';
 import 'package:photo_view/photo_view.dart';
@@ -25,20 +24,20 @@ class _PictureViewState extends State<PictureView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Picture View'),
+        title: Text(pictureName),
       ),
       body: Center(
         child: FutureBuilder(
-          future: OssService.downloadFileInTemp(widget.picturePath),
+          future: OssService.getFileUrl(widget.picturePath),
           builder: (context, futureSnapshot) {
             if (futureSnapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             } else if (futureSnapshot.hasError) {
               return Text('Error: ${futureSnapshot.error}');
             }
-            final localPath = futureSnapshot.data as String;
+            final pictureUrl = futureSnapshot.data as String;
             return PhotoView(
-              imageProvider: FileImage(File(localPath)),
+              imageProvider: NetworkImage(pictureUrl),
             );
           },
         ),

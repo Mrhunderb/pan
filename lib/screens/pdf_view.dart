@@ -24,7 +24,7 @@ class _PdfViewState extends State<PdfView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PDF View'),
+        title: Text(pdfName),
       ),
       body: Center(
         child: FutureBuilder(

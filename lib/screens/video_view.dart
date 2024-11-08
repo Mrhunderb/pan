@@ -41,9 +41,10 @@ class _VideoViewState extends State<VideoView> {
 
   @override
   Widget build(BuildContext context) {
+    final videoName = widget.videoPath.split('/').last;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Video Player'),
+        title: Text(videoName),
       ),
       body: Center(
         child: _controller.value.isInitialized

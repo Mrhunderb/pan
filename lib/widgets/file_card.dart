@@ -5,6 +5,7 @@ import 'package:pan/screens/pdf_view.dart';
 import 'package:pan/screens/picture_view.dart';
 import 'package:pan/screens/unable_view.dart';
 import 'package:pan/screens/video_view.dart';
+import 'package:pan/utils/type.dart';
 
 class FileCard extends StatefulWidget {
   final String path;
@@ -30,41 +31,16 @@ class _FileCardState extends State<FileCard> {
       ? widget.path.split('/')[widget.path.split('/').length - 2]
       : widget.path.split('/').last;
 
-  final Map<String, String> _fileTypeToImagePath = {
-    'pdf': 'assets/pdf.png',
-    'doc': 'assets/doc.png',
-    'image': 'assets/image.png',
-    'video': 'assets/video.png',
-    'folder': 'assets/folder.png',
-    'file': 'assets/file.png',
-  };
-
-  final Map<String, String> _suffixToType = {
-    'pdf': 'pdf',
-    'doc': 'doc',
-    'txt': 'doc',
-    'docx': 'doc',
-    'png': 'image',
-    'jpg': 'image',
-    'jpeg': 'image',
-    'mp4': 'video',
-    'mp3': 'video',
-    'mkv': 'video',
-    'avi': 'video',
-  };
-
-  String get type {
-    if (widget.isFolder) {
-      return 'folder';
-    }
-    return _suffixToType[fileSuffix] ?? 'file';
-  }
-
-  String get imagePath {
-    return _fileTypeToImagePath[type]!;
-  }
-
+  late String type;
+  late String imagePath;
   bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    type = getFileType(widget.path, widget.isFolder);
+    imagePath = getImagePath(type);
+  }
 
   void _onTap(BuildContext context) {
     if (widget.isFolder) {
