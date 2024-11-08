@@ -7,7 +7,7 @@ class UnableView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Unable View'),
+        title: const Text('预览'),
       ),
       body: const Center(
         child: Text(
