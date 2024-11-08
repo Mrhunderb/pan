@@ -11,6 +11,7 @@ class DownloadPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Text('传输列表'),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         ),
         body: Center(
           child: Column(

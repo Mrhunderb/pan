@@ -1,5 +1,6 @@
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
+import 'package:pan/screens/download.dart';
 import 'package:pan/services/oss.dart';
 import 'package:pan/widgets/file_card.dart';
 import 'package:minio/models.dart';
@@ -33,7 +34,31 @@ class _PanFilePage extends State<PanFilePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(widget.title),
+            IconButton(
+              icon: const Icon(Icons.swap_vert_outlined),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return DownloadPage(
+                    items: [
+                      DownloadItem(
+                        title: 'File 1',
+                        subtitle: 'File 1 subtitle',
+                      ),
+                      DownloadItem(
+                        title: 'File 2',
+                        subtitle: 'File 2 subtitle',
+                      ),
+                    ],
+                  );
+                }));
+              },
+            ),
+          ],
+        ),
       ),
       body: FutureBuilder<List<dynamic>>(
         future: Future.wait([_files, _folders]),
@@ -62,6 +87,25 @@ class _PanFilePage extends State<PanFilePage> {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return DownloadPage(
+              items: [
+                DownloadItem(
+                  title: 'File 1',
+                  subtitle: 'File 1 subtitle',
+                ),
+                DownloadItem(
+                  title: 'File 2',
+                  subtitle: 'File 2 subtitle',
+                ),
+              ],
+            );
+          }));
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
