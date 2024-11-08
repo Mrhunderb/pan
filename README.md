@@ -1,16 +1,24 @@
-# pan
+# 基于对象存储服务的文件管理APP
 
-A new Flutter project.
+## 具体要求：
+1. 编写APP访问MinIO对象存储服务中名为fultter-test的Bucket，并能对此Bucket内所存储
+的文件进行查看、删除、上传和下载操作
+2. 此APP需维护一个上传队列和一个下载队列，多文件上传或下载时需要进行排队处理，
+每个队列最多支持3个同时进行的任务。
+3. 此APP使用Flutter开发, 目标程序在Windows、Mac和Android，iOS系统中任意一个可运
+行即可
+4. 完成后提交完整可编译的工程源代码
 
-## Getting Started
+## 已实现的功能
+- [x] 文件列表查看 
+- [x] 文件预览(图片、音视频及pdf) 
+- [ ] 文件删除 
+- [ ] 文件下载 
+- [ ] 文件上传 
 
-This project is a starting point for a Flutter application.
+## 效果展示
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 改进计划
+- 文件的展示方式（列表视图，图标试图）
+- 文件的排序
