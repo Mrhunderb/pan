@@ -8,6 +8,7 @@ import 'package:minio/models.dart';
 class PanFilePage extends StatefulWidget {
   final String title;
   final String prefix;
+
   const PanFilePage({
     super.key,
     required this.title,
@@ -19,14 +20,110 @@ class PanFilePage extends StatefulWidget {
 }
 
 class _PanFilePage extends State<PanFilePage> {
-  late Future<List<Object>> _files;
-  late Future<List<String>> _folders;
+  late Future<void> _initialLoad; // 初始加载 Future
+  List<Object> _filesCache = []; // 缓存文件列表
+  List<String> _foldersCache = []; // 缓存文件夹列表
+  OverlayEntry? _overlayEntry;
+
+  final Map<String, bool> _selectedFiles = {};
+
+  void _onSelect(String path) {
+    setState(() {
+      _selectedFiles[path] = !_selectedFiles[path]!; // 切换选中状态
+    });
+    if (_selectedFiles.values.any((selected) => selected)) {
+      _showOverlay(context);
+    } else {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    }
+  }
+
+  List<String> getSelectedFiles() {
+    return _selectedFiles.entries
+        .where((element) => element.value)
+        .map((e) => e.key)
+        .toList();
+  }
+
+  void _clearSelected() {
+    setState(() {
+      _selectedFiles.forEach((key, value) {
+        _selectedFiles[key] = false;
+      });
+    });
+  }
+
+  void _showOverlay(BuildContext context) {
+    if (_overlayEntry != null) {
+      return; // 防止重复显示
+    }
+
+    OverlayState overlayState = Overlay.of(context);
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            color: Colors.white.withOpacity(0.98),
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: const Text('删除'),
+                  onTap: () {
+                    OssService.deleteFiles(getSelectedFiles());
+                    _clearSelected();
+                    _overlayEntry?.remove();
+                    _overlayEntry = null;
+                    _loadFilesAndFolders();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.download),
+                  title: const Text('下载'),
+                  onTap: () {
+                    _clearSelected();
+                    _overlayEntry?.remove();
+                    _overlayEntry = null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState.insert(_overlayEntry!);
+  }
 
   @override
   void initState() {
     super.initState();
-    _files = OssService.listFiles(widget.prefix);
-    _folders = OssService.listFolders(widget.prefix);
+    // 初始化数据并缓存
+    _initialLoad = _loadFilesAndFolders();
+  }
+
+  Future<void> _loadFilesAndFolders() async {
+    // 获取文件和文件夹并缓存
+    final files = await OssService.listFiles(widget.prefix);
+    final folders = await OssService.listFolders(widget.prefix);
+
+    setState(() {
+      _filesCache = files;
+      _foldersCache = folders;
+      // 初始化选择状态
+      for (var folder in _foldersCache) {
+        _selectedFiles.putIfAbsent(folder, () => false);
+      }
+      for (var file in _filesCache) {
+        _selectedFiles.putIfAbsent(file.key!, () => false);
+      }
+    });
   }
 
   @override
@@ -37,7 +134,9 @@ class _PanFilePage extends State<PanFilePage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(widget.title),
+            Expanded(flex: 1, child: Text(widget.title)),
+            Text(
+                "选中: ${_selectedFiles.values.where((selected) => selected).length}"),
             IconButton(
               icon: const Icon(Icons.swap_vert_outlined),
               onPressed: () {
@@ -60,29 +159,32 @@ class _PanFilePage extends State<PanFilePage> {
           ],
         ),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: Future.wait([_files, _folders]),
+      body: FutureBuilder<void>(
+        future: _initialLoad,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          List<Object> files = snapshot.data![0];
-          List<String> folders = snapshot.data![1];
+
           return ListView(
             children: [
-              for (var folder in folders)
+              for (var folder in _foldersCache)
                 FileCard(
-                  path: folder.runes.string,
+                  path: folder,
                   isFolder: true,
+                  onSelect: _onSelect,
+                  isSelect: _selectedFiles[folder]!,
                 ),
-              for (var file in files)
+              for (var file in _filesCache)
                 FileCard(
                   path: file.key!,
                   fileSize: filesize(file.size!),
                   createdTime: file.lastModified,
                   isFolder: false,
+                  onSelect: _onSelect,
+                  isSelect: _selectedFiles[file.key!]!,
                 ),
             ],
           );
@@ -90,20 +192,7 @@ class _PanFilePage extends State<PanFilePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return DownloadPage(
-              items: [
-                DownloadItem(
-                  title: 'File 1',
-                  subtitle: 'File 1 subtitle',
-                ),
-                DownloadItem(
-                  title: 'File 2',
-                  subtitle: 'File 2 subtitle',
-                ),
-              ],
-            );
-          }));
+          _showOverlay(context);
         },
         child: const Icon(Icons.add),
       ),

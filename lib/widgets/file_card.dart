@@ -12,6 +12,8 @@ class FileCard extends StatefulWidget {
   final String? fileSize;
   final DateTime? createdTime;
   final bool isFolder;
+  final bool isSelect;
+  final Function(String) onSelect;
 
   const FileCard({
     super.key,
@@ -19,6 +21,8 @@ class FileCard extends StatefulWidget {
     this.fileSize,
     this.createdTime,
     required this.isFolder,
+    required this.onSelect,
+    required this.isSelect,
   });
 
   @override
@@ -143,6 +147,13 @@ class _FileCardState extends State<FileCard> {
                 ],
               ),
             ),
+            //checkbox
+            Checkbox(
+              value: widget.isSelect,
+              onChanged: (bool? value) {
+                widget.onSelect(widget.path);
+              },
+            )
           ],
         ),
       ),
