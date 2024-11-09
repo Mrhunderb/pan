@@ -13,10 +13,30 @@
 - [x] 文件列表查看(下拉刷新)
 - [x] 文件预览(图片、音视频及pdf, 不保证所有格式都能播放) 
 - [x] 文件删除 
-- [x] 文件下载 
-- [ ] 文件上传 
+- [x] 文件下载（不支持文件夹的下载）
+- [x] 文件上传 
 
 ## 效果展示
+<div style="display: flex; flex-wrap: wrap;">
+    <div style="flex: 1 0 30%; margin: 5px;">
+        <img src="res/home1.jpg" alt="Image 1" style="width: 100%;">
+    </div>
+    <div style="flex: 1 0 30%; margin: 5px;">
+        <img src="res/home2.jpg" alt="Image 1" style="width: 100%;">
+    </div>
+    <div style="flex: 1 0 30%; margin: 5px;">
+        <img src="res/picture_view.jpg" alt="Image 1" style="width: 100%;">
+    </div>
+    <div style="flex: 1 0 30%; margin: 5px;">
+        <img src="res/video_play.jpg" alt="Image 1" style="width: 100%;">
+    </div>
+    <div style="flex: 1 0 30%; margin: 5px;">
+        <img src="res/pdf_view.jpg" alt="Image 1" style="width: 100%;">
+    </div>
+    <div style="flex: 1 0 30%; margin: 5px;">
+        <img src="res/transfer.jpg" alt="Image 1" style="width: 100%;">
+    </div>
+</div>
 
 ## 改进计划
 - 文件的展示方式（列表视图，图标视图）
