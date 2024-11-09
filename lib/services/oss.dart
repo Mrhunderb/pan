@@ -21,12 +21,8 @@ class OssService {
     useSSL: false,
   );
 
-  Future<void> uploadFile(String objectName, String filePath) async {
-    await minio.putObject(
-      bucketName,
-      objectName,
-      filePath as Stream<Uint8List>,
-    );
+  static Future<void> uploadFile(String objectName, String filePath) async {
+    await minio.fPutObject(bucketName, objectName, filePath);
   }
 
   /// Count the number of files in a bucket
@@ -151,12 +147,12 @@ class OssService {
   }
 
   static Future<void> deleteFiles(List<String> files, String prefix) async {
+    List<String> folders = await listFolders(prefix);
     for (var file in files) {
-      List<String> folders = await listFolders(prefix);
       if (folders.contains(file)) {
-        List<Object> files = await listFiles(file, true);
-        for (var file in files) {
-          await minio.removeObject(bucketName, file.key!);
+        List<Object> folderFiles = await listFiles(file, true);
+        for (var f in folderFiles) {
+          await minio.removeObject(bucketName, f.key!);
         }
         continue;
       }
