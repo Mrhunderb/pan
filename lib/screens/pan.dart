@@ -90,7 +90,7 @@ class _PanFilePage extends State<PanFilePage> {
                           _clearSelected();
                           _overlayEntry?.remove();
                           _overlayEntry = null;
-                          _loadFilesAndFolders();
+                          _refresh();
                         },
                         onCancel: () {
                           Navigator.pop(context);
@@ -143,6 +143,12 @@ class _PanFilePage extends State<PanFilePage> {
     });
   }
 
+  Future<void> _refresh() async {
+    setState(() {
+      _initialLoad = _loadFilesAndFolders();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,36 +182,39 @@ class _PanFilePage extends State<PanFilePage> {
           ],
         ),
       ),
-      body: FutureBuilder<void>(
-        future: _initialLoad,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+      body: RefreshIndicator(
+        onRefresh: _refresh, // 下拉刷新
+        child: FutureBuilder<void>(
+          future: _initialLoad,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
 
-          return ListView(
-            children: [
-              for (var folder in _foldersCache)
-                FileCard(
-                  path: folder,
-                  isFolder: true,
-                  onSelect: _onSelect,
-                  isSelect: _selectedFiles[folder]!,
-                ),
-              for (var file in _filesCache)
-                FileCard(
-                  path: file.key!,
-                  fileSize: filesize(file.size!),
-                  createdTime: file.lastModified,
-                  isFolder: false,
-                  onSelect: _onSelect,
-                  isSelect: _selectedFiles[file.key!]!,
-                ),
-            ],
-          );
-        },
+            return ListView(
+              children: [
+                for (var folder in _foldersCache)
+                  FileCard(
+                    path: folder,
+                    isFolder: true,
+                    onSelect: _onSelect,
+                    isSelect: _selectedFiles[folder]!,
+                  ),
+                for (var file in _filesCache)
+                  FileCard(
+                    path: file.key!,
+                    fileSize: filesize(file.size!),
+                    createdTime: file.lastModified,
+                    isFolder: false,
+                    onSelect: _onSelect,
+                    isSelect: _selectedFiles[file.key!]!,
+                  ),
+              ],
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
