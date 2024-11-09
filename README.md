@@ -14,7 +14,12 @@
 - [x] 文件预览(图片、音视频及pdf, 不保证所有格式都能播放) 
 - [x] 文件删除 
 - [x] 文件下载（不支持文件夹的下载）
-- [x] 文件上传 
+- [x] 文件上传(本地文件选择上传) 
+
+## 说明
+运行在安卓平台
+minio相关设置在文件`lib/services/oss.dart`下
+下载文件路径为`path_provider`包提供，在我的机器上为`/storage/emulated/0/Android/data/com.example.pan/files/downloads`
 
 ## 效果展示
 <div style="display: flex; flex-wrap: wrap;">
@@ -44,6 +49,7 @@
 - 一次显示一定数量的文件
 - 退出保存下载和上传历史
 - 选择保存路径
+- 文件夹的下载
 
 ## 遇到的问题
 - 在改变文件复选框的状态时，都要重新渲染，导致重新请求文件列表（解决方法：缓存请求数据）
