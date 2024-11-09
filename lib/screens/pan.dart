@@ -114,7 +114,9 @@ class _PanFilePage extends State<PanFilePage> {
                         context,
                         listen: false);
                     for (var file in getSelectedFiles()) {
-                      print(_downloadPath + file);
+                      if (file.endsWith('/')) {
+                        continue;
+                      }
                       downloadQueue.addTask(
                           Download(name: file, path: '$_downloadPath/$file'));
                     }
