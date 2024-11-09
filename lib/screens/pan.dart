@@ -9,6 +9,7 @@ import 'package:pan/services/oss.dart';
 import 'package:pan/widgets/confirm.dart';
 import 'package:pan/widgets/file_card.dart';
 import 'package:minio/models.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class PanFilePage extends StatefulWidget {
@@ -30,6 +31,7 @@ class _PanFilePage extends State<PanFilePage> {
   List<Object> _filesCache = [];
   List<String> _foldersCache = [];
   OverlayEntry? _overlayEntry;
+  late String _downloadPath;
 
   final Map<String, bool> _selectedFiles = {};
 
@@ -112,8 +114,9 @@ class _PanFilePage extends State<PanFilePage> {
                         context,
                         listen: false);
                     for (var file in getSelectedFiles()) {
+                      print(_downloadPath + file);
                       downloadQueue.addTask(
-                          Download(name: file, path: '/sdcard/Download/$file'));
+                          Download(name: file, path: '$_downloadPath/$file'));
                     }
                     _clearSelected();
                     _overlayEntry?.remove();
@@ -150,10 +153,12 @@ class _PanFilePage extends State<PanFilePage> {
     // 获取文件和文件夹并缓存
     final files = await OssService.listFiles(widget.prefix);
     final folders = await OssService.listFolders(widget.prefix);
+    final downloadPath = await getDownloadsDirectory();
 
     setState(() {
       _filesCache = files;
       _foldersCache = folders;
+      _downloadPath = downloadPath!.path;
       // 初始化选择状态
       for (var folder in _foldersCache) {
         _selectedFiles.putIfAbsent(folder, () => false);
