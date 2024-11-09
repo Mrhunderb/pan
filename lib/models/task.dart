@@ -8,6 +8,7 @@ class TaskQueue with ChangeNotifier {
   final Queue<Download> _taskQueue = Queue();
   final Queue<Download> _downloadTasks = Queue();
   final Queue<Download> _completedTasks = Queue();
+  final Queue<Download> _pausedTasks = Queue();
   int _currentTaskCount = 0;
 
   TaskQueue(this.maxConcurrentTasks);
@@ -15,6 +16,37 @@ class TaskQueue with ChangeNotifier {
   void addTask(Download task) {
     task.addListener(notifyListeners);
     _taskQueue.add(task);
+    _startNextTask();
+  }
+
+  void removeTask(Download task) {
+    task.cancel();
+    task.removeListener(notifyListeners);
+    _taskQueue.remove(task);
+    _completedTasks.remove(task);
+    _downloadTasks.remove(task);
+    _pausedTasks.remove(task);
+    notifyListeners();
+  }
+
+  void cancelTask(Download task) {
+    task.cancel();
+    removeTask(task);
+  }
+
+  void pauseTask(Download task) {
+    task.pause();
+    _pausedTasks.add(task);
+    _downloadTasks.remove(task);
+    notifyListeners();
+    _startNextTask();
+  }
+
+  void resumeTask(Download task) {
+    task.resume();
+    _pausedTasks.remove(task);
+    _taskQueue.add(task);
+    notifyListeners();
     _startNextTask();
   }
 
@@ -26,7 +58,9 @@ class TaskQueue with ChangeNotifier {
     final item = _taskQueue.removeFirst();
     _downloadTasks.add(item);
     item.start().whenComplete(() {
-      _completedTasks.add(item);
+      if (item.status != Status.canceled) {
+        _startNextTask();
+      }
       _downloadTasks.remove(item);
       _currentTaskCount--;
       notifyListeners();
@@ -38,5 +72,5 @@ class TaskQueue with ChangeNotifier {
   List<Download> get completedTasks => _completedTasks.toList();
   List<Download> get downloadTasks => _downloadTasks.toList();
   List<Download> get allTasks =>
-      [..._downloadTasks, ..._taskQueue, ..._completedTasks];
+      [..._downloadTasks, ..._pausedTasks, ..._taskQueue, ..._completedTasks];
 }

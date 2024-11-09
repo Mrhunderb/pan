@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pan/models/download.dart';
 import 'package:pan/models/task.dart';
 import 'package:pan/widgets/download_card.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,13 @@ class _DownloadPageState extends State<DownloadPage> {
                   for (var task in queue.allTasks)
                     DownloadCard(
                       task: task,
+                      onCancel: () => queue.cancelTask(task),
+                      onPause: () => {
+                        if (task.status == Status.running)
+                          queue.pauseTask(task)
+                        else if (task.status == Status.paused)
+                          queue.resumeTask(task)
+                      },
                     )
                 ],
               ),
