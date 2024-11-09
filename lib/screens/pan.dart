@@ -189,7 +189,7 @@ class _PanFilePage extends State<PanFilePage> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: _refresh, // 下拉刷新
+        onRefresh: _refresh,
         child: FutureBuilder<void>(
           future: _initialLoad,
           builder: (context, snapshot) {
@@ -200,6 +200,8 @@ class _PanFilePage extends State<PanFilePage> {
             }
 
             return ListView(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).size.height / 5),
               children: [
                 for (var folder in _foldersCache)
                   FileCard(
