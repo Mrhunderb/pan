@@ -241,7 +241,6 @@ class _PanFilePage extends State<PanFilePage> {
               for (var file in result.files) {
                 uploadTaskQueue.addTask(
                     Upload(name: widget.prefix + file.name, path: file.path!));
-                OssService.uploadFile(widget.prefix + file.name, file.path!);
               }
               _refresh();
             }

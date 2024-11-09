@@ -63,8 +63,6 @@ class TaskQueue<T extends Task> extends ChangeNotifier {
 
   void pauseTask(T task) {
     task.pause();
-    _pausedTasks.add(task);
-    _downloadTasks.remove(task);
     notifyListeners();
     _startNextTask();
   }
@@ -85,13 +83,13 @@ class TaskQueue<T extends Task> extends ChangeNotifier {
     final item = _taskQueue.removeFirst();
     _downloadTasks.add(item);
     item.start().whenComplete(() {
-      if (item.status != Status.canceled) {
-        _startNextTask();
-        return;
+      if (item.status == Status.completed) {
+        _completedTasks.add(item);
+      } else if (item.status == Status.paused) {
+        _pausedTasks.add(item);
       }
-      _currentTaskCount--;
       _downloadTasks.remove(item);
-      _completedTasks.add(item);
+      _currentTaskCount--;
       notifyListeners();
       _startNextTask();
     });

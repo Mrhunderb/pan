@@ -14,7 +14,7 @@ class Upload extends Task {
     notifyListeners();
 
     try {
-      await OssService.fDownloadWithProgress(name, path, (received, total) {
+      await OssService.fUploadWithProgress(name, path, (received, total) {
         if (_isPaused || _isCanceled) {
           throw Exception(_isPaused ? "Paused" : "Canceled");
         }

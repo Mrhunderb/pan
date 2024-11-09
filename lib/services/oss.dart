@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -23,6 +24,41 @@ class OssService {
 
   static Future<void> uploadFile(String objectName, String filePath) async {
     await minio.fPutObject(bucketName, objectName, filePath);
+  }
+
+  static Future<void> fUploadWithProgress(
+    String object,
+    String filePath,
+    Function(int, int) onProgress,
+  ) async {
+    final file = File(filePath);
+    final stat = await file.stat();
+    if (stat.size > minio.maxObjectSize) {
+      throw MinioError(
+        '$filePath size : ${stat.size}, max allowed size : 5TB',
+      );
+    }
+
+    int totalBytesSent = 0;
+
+    final fileStream = file.openRead().transform<Uint8List>(
+      StreamTransformer.fromHandlers(
+        handleData: (data, sink) {
+          sink.add(Uint8List.fromList(data));
+
+          totalBytesSent += data.length;
+
+          onProgress(totalBytesSent, stat.size);
+        },
+      ),
+    );
+
+    await minio.putObject(
+      bucketName,
+      object,
+      fileStream,
+      size: stat.size,
+    );
   }
 
   /// Count the number of files in a bucket
