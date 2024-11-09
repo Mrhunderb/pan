@@ -27,6 +27,7 @@ class TaskQueue with ChangeNotifier {
     _downloadTasks.add(item);
     item.start().whenComplete(() {
       _completedTasks.add(item);
+      _downloadTasks.remove(item);
       _currentTaskCount--;
       notifyListeners();
       _startNextTask();
