@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pan/models/download.dart';
 import 'package:pan/models/task.dart';
+import 'package:pan/models/upload.dart';
 import 'package:pan/screens/pan.dart';
 import 'package:provider/provider.dart';
 
@@ -12,8 +14,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => TaskQueue(3),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<TaskQueue<Download>>(
+            create: (context) => TaskQueue<Download>(3)),
+        ChangeNotifierProvider<TaskQueue<Upload>>(
+            create: (context) => TaskQueue<Upload>(3)),
+      ],
       child: MaterialApp(
         title: 'Z 盘',
         theme: ThemeData(

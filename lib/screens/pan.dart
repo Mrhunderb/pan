@@ -1,7 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:pan/models/download.dart';
 import 'package:pan/models/task.dart';
+import 'package:pan/models/upload.dart';
 import 'package:pan/screens/tansfer.dart';
 import 'package:pan/services/oss.dart';
 import 'package:pan/widgets/confirm.dart';
@@ -106,11 +108,12 @@ class _PanFilePage extends State<PanFilePage> {
                   leading: const Icon(Icons.download),
                   title: const Text('下载'),
                   onTap: () {
-                    final taskQueue =
-                        Provider.of<TaskQueue>(context, listen: false);
+                    final downloadQueue = Provider.of<TaskQueue<Download>>(
+                        context,
+                        listen: false);
                     for (var file in getSelectedFiles()) {
-                      taskQueue
-                          .addTask(Download(file, '/sdcard/Download/$file'));
+                      downloadQueue.addTask(
+                          Download(name: file, path: '/sdcard/Download/$file'));
                     }
                     _clearSelected();
                     _overlayEntry?.remove();
@@ -225,7 +228,25 @@ class _PanFilePage extends State<PanFilePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          final uploadTaskQueue =
+              Provider.of<TaskQueue<Upload>>(context, listen: false);
+          FilePicker.platform
+              .pickFiles(
+            type: FileType.any,
+            allowMultiple: true,
+          )
+              .then((result) {
+            if (result != null) {
+              for (var file in result.files) {
+                uploadTaskQueue.addTask(
+                    Upload(name: widget.prefix + file.name, path: file.path!));
+                OssService.uploadFile(widget.prefix + file.name, file.path!);
+              }
+              _refresh();
+            }
+          });
+        },
         child: const Icon(Icons.add),
       ),
     );

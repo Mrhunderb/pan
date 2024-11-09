@@ -96,6 +96,10 @@ class _FileCardState extends State<FileCard> {
     });
   }
 
+  void _onLongPress() {
+    widget.onSelect(widget.path);
+  }
+
   @override
   Widget build(BuildContext context) {
     final String formattedDate = widget.createdTime != null
@@ -114,6 +118,7 @@ class _FileCardState extends State<FileCard> {
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
+        onLongPress: _onLongPress,
         child: Row(
           children: [
             Image.asset(

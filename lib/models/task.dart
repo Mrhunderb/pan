@@ -1,25 +1,52 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:pan/models/download.dart';
 
-class TaskQueue with ChangeNotifier {
+enum Status { pending, running, completed, failed, paused, canceled }
+
+class Task extends ChangeNotifier {
+  final String name;
+  final String path;
+  int received = 0;
+  int total = 0;
+  double progress = 0;
+  Status status = Status.pending;
+
+  Task({required this.name, required this.path});
+  Future<void> start() {
+    return Future.value();
+  }
+
+  Future<void> pause() {
+    return Future.value();
+  }
+
+  Future<void> resume() {
+    return Future.value();
+  }
+
+  Future<void> cancel() {
+    return Future.value();
+  }
+}
+
+class TaskQueue<T extends Task> extends ChangeNotifier {
   final int maxConcurrentTasks;
-  final Queue<Download> _taskQueue = Queue();
-  final Queue<Download> _downloadTasks = Queue();
-  final Queue<Download> _completedTasks = Queue();
-  final Queue<Download> _pausedTasks = Queue();
+  final Queue<T> _taskQueue = Queue();
+  final Queue<T> _downloadTasks = Queue();
+  final Queue<T> _completedTasks = Queue();
+  final Queue<T> _pausedTasks = Queue();
   int _currentTaskCount = 0;
 
   TaskQueue(this.maxConcurrentTasks);
 
-  void addTask(Download task) {
+  void addTask(T task) {
     task.addListener(notifyListeners);
     _taskQueue.add(task);
     _startNextTask();
   }
 
-  void removeTask(Download task) {
+  void removeTask(T task) {
     task.cancel();
     task.removeListener(notifyListeners);
     _taskQueue.remove(task);
@@ -29,12 +56,12 @@ class TaskQueue with ChangeNotifier {
     notifyListeners();
   }
 
-  void cancelTask(Download task) {
+  void cancelTask(T task) {
     task.cancel();
     removeTask(task);
   }
 
-  void pauseTask(Download task) {
+  void pauseTask(T task) {
     task.pause();
     _pausedTasks.add(task);
     _downloadTasks.remove(task);
@@ -42,7 +69,7 @@ class TaskQueue with ChangeNotifier {
     _startNextTask();
   }
 
-  void resumeTask(Download task) {
+  void resumeTask(T task) {
     task.resume();
     _pausedTasks.remove(task);
     _taskQueue.add(task);
@@ -60,17 +87,19 @@ class TaskQueue with ChangeNotifier {
     item.start().whenComplete(() {
       if (item.status != Status.canceled) {
         _startNextTask();
+        return;
       }
-      _downloadTasks.remove(item);
       _currentTaskCount--;
+      _downloadTasks.remove(item);
+      _completedTasks.add(item);
       notifyListeners();
       _startNextTask();
     });
   }
 
-  List<Download> get tasks => _taskQueue.toList();
-  List<Download> get completedTasks => _completedTasks.toList();
-  List<Download> get downloadTasks => _downloadTasks.toList();
-  List<Download> get allTasks =>
+  List<T> get tasks => _taskQueue.toList();
+  List<T> get completedTasks => _completedTasks.toList();
+  List<T> get downloadTasks => _downloadTasks.toList();
+  List<T> get allTasks =>
       [..._downloadTasks, ..._pausedTasks, ..._taskQueue, ..._completedTasks];
 }

@@ -1,13 +1,13 @@
 import 'package:pan/models/task.dart';
 import 'package:pan/services/oss.dart';
 
-class Download extends Task {
+class Upload extends Task {
   bool _isPaused = false;
   bool _isCanceled = false;
 
-  Download({required super.name, required super.path});
+  Upload({required super.name, required super.path});
 
-  Future<void> download() async {
+  Future<void> upload() async {
     status = Status.running;
     _isPaused = false;
     _isCanceled = false;
@@ -32,13 +32,7 @@ class Download extends Task {
   }
 
   @override
-  Future<void> pause() async {
-    if (status == Status.running) {
-      _isPaused = true;
-      status = Status.paused;
-      notifyListeners();
-    }
-  }
+  Future<void> pause() async {}
 
   @override
   Future<void> cancel() async {
@@ -52,15 +46,10 @@ class Download extends Task {
   @override
   Future<void> start() async {
     if (status == Status.pending || status == Status.paused) {
-      await download();
+      await upload();
     }
   }
 
   @override
-  Future<void> resume() async {
-    if (status == Status.paused) {
-      _isPaused = false;
-      status = Status.pending;
-    }
-  }
+  Future<void> resume() async {}
 }

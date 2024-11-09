@@ -1,9 +1,10 @@
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
-import 'package:pan/models/download.dart';
+import 'package:pan/models/task.dart';
 
 class DownloadCard extends StatefulWidget {
-  final Download task;
+  final Task task;
+  final bool isUpload;
   final Function() onCancel;
   final Function() onPause;
 
@@ -12,6 +13,7 @@ class DownloadCard extends StatefulWidget {
     required this.task,
     required this.onCancel,
     required this.onPause,
+    required this.isUpload,
   });
 
   @override
@@ -58,14 +60,16 @@ class _DownloadCardState extends State<DownloadCard> {
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {
-              widget.onPause();
-            },
-            icon: Icon(widget.task.status == Status.running
-                ? Icons.pause
-                : Icons.play_arrow),
-          ),
+          widget.isUpload
+              ? const SizedBox()
+              : IconButton(
+                  onPressed: () {
+                    widget.onPause();
+                  },
+                  icon: Icon(widget.task.status == Status.running
+                      ? Icons.pause
+                      : Icons.play_arrow),
+                ),
           IconButton(
             onPressed: () {
               widget.onCancel();
