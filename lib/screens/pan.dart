@@ -117,6 +117,15 @@ class _PanFilePage extends State<PanFilePage> {
                     _overlayEntry = null;
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.cancel),
+                  title: const Text('取消'),
+                  onTap: () {
+                    _clearSelected();
+                    _overlayEntry?.remove();
+                    _overlayEntry = null;
+                  },
+                ),
               ],
             ),
           ),
@@ -167,8 +176,6 @@ class _PanFilePage extends State<PanFilePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(flex: 1, child: Text(widget.title)),
-            Text(
-                "选中: ${_selectedFiles.values.where((selected) => selected).length}"),
             IconButton(
               icon: const Icon(Icons.swap_vert_outlined),
               onPressed: () {
