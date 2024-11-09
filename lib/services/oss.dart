@@ -133,7 +133,6 @@ class OssService {
 
     final localStat = await partFile.stat();
     if (localStat.size != stat.size) {
-      print('Size mismatch between downloaded file and the object');
       throw MinioError('Size mismatch between downloaded file and the object');
     }
 

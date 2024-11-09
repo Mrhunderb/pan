@@ -6,6 +6,7 @@ enum Status { pending, running, completed, failed }
 class Download extends ChangeNotifier {
   final String name;
   final String path;
+  double progress = 0;
   Status status = Status.pending;
 
   Download(this.name, this.path);
@@ -14,7 +15,10 @@ class Download extends ChangeNotifier {
     notifyListeners();
     status = Status.running;
     try {
-      await OssService.fDownloadWithProgress(name, path, (received, total) {});
+      await OssService.fDownloadWithProgress(name, path, (received, total) {
+        progress = received / total;
+        notifyListeners();
+      });
       status = Status.completed;
       notifyListeners();
     } catch (e) {
@@ -23,8 +27,18 @@ class Download extends ChangeNotifier {
     }
   }
 
+  Future<void> pause() async {
+    status = Status.pending;
+    notifyListeners();
+  }
+
+  Future<void> cancel() async {
+    status = Status.failed;
+    notifyListeners();
+  }
+
   Future<void> start() async {
     status = Status.running;
-    download();
+    await download();
   }
 }

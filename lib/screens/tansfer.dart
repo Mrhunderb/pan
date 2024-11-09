@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pan/models/task.dart';
+import 'package:pan/widgets/download_card.dart';
 import 'package:provider/provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -33,21 +34,13 @@ class _DownloadPageState extends State<DownloadPage> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: queue.allTasks.length,
-                itemBuilder: (context, index) {
-                  final task = queue.allTasks[index];
-                  return ListTile(
-                    title: Text(task.name),
-                    subtitle: Text(task.status.toString()),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.cancel),
-                      onPressed: () {
-                        queue.removeTask(task);
-                      },
-                    ),
-                  );
-                },
+              child: ListView(
+                children: [
+                  for (var task in queue.allTasks)
+                    DownloadCard(
+                      task: task,
+                    )
+                ],
               ),
             ),
           ],

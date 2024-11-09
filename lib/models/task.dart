@@ -6,6 +6,7 @@ import 'package:pan/models/download.dart';
 class TaskQueue with ChangeNotifier {
   final int maxConcurrentTasks;
   final Queue<Download> _taskQueue = Queue();
+  final Queue<Download> _downloadTasks = Queue();
   final Queue<Download> _completedTasks = Queue();
   int _currentTaskCount = 0;
 
@@ -13,34 +14,28 @@ class TaskQueue with ChangeNotifier {
 
   void addTask(Download task) {
     task.addListener(notifyListeners);
-    for (var t in _taskQueue) {
-      if (t.name == task.name && t.status != Status.completed) {
-        return;
-      }
-    }
     _taskQueue.add(task);
-    _tryExecuteNext();
+    _startNextTask();
   }
 
-  void removeTask(Download task) {
-    _taskQueue.remove(task);
-    _completedTasks.remove(task);
-    notifyListeners();
-  }
-
-  void _tryExecuteNext() {
-    if (_currentTaskCount < maxConcurrentTasks && _taskQueue.isNotEmpty) {
-      _currentTaskCount++;
-      final task = _taskQueue.removeFirst();
-      task.start().whenComplete(() {
-        _currentTaskCount--;
-        _completedTasks.add(task);
-        _tryExecuteNext();
-      });
+  void _startNextTask() {
+    if (_currentTaskCount >= maxConcurrentTasks || _taskQueue.isEmpty) {
+      return;
     }
+    _currentTaskCount++;
+    final item = _taskQueue.removeFirst();
+    _downloadTasks.add(item);
+    item.start().whenComplete(() {
+      _completedTasks.add(item);
+      _currentTaskCount--;
+      notifyListeners();
+      _startNextTask();
+    });
   }
 
   List<Download> get tasks => _taskQueue.toList();
   List<Download> get completedTasks => _completedTasks.toList();
-  List<Download> get allTasks => [..._taskQueue, ..._completedTasks];
+  List<Download> get downloadTasks => _downloadTasks.toList();
+  List<Download> get allTasks =>
+      [..._downloadTasks, ..._taskQueue, ..._completedTasks];
 }
