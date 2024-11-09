@@ -21,6 +21,10 @@ final Map<String, String> fileTypeToImagePath = {
   'file': 'assets/file.png',
 };
 
+String getFileName(String path) {
+  return path.split('/').last;
+}
+
 String getFileType(String path, bool isFolder) {
   if (isFolder) {
     return 'folder';

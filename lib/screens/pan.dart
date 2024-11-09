@@ -1,10 +1,13 @@
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
-import 'package:pan/screens/download.dart';
+import 'package:pan/models/download.dart';
+import 'package:pan/models/task.dart';
+import 'package:pan/screens/tansfer.dart';
 import 'package:pan/services/oss.dart';
 import 'package:pan/widgets/confirm.dart';
 import 'package:pan/widgets/file_card.dart';
 import 'package:minio/models.dart';
+import 'package:provider/provider.dart';
 
 class PanFilePage extends StatefulWidget {
   final String title;
@@ -21,9 +24,9 @@ class PanFilePage extends StatefulWidget {
 }
 
 class _PanFilePage extends State<PanFilePage> {
-  late Future<void> _initialLoad; // 初始加载 Future
-  List<Object> _filesCache = []; // 缓存文件列表
-  List<String> _foldersCache = []; // 缓存文件夹列表
+  late Future<void> _initialLoad;
+  List<Object> _filesCache = [];
+  List<String> _foldersCache = [];
   OverlayEntry? _overlayEntry;
 
   final Map<String, bool> _selectedFiles = {};
@@ -103,6 +106,12 @@ class _PanFilePage extends State<PanFilePage> {
                   leading: const Icon(Icons.download),
                   title: const Text('下载'),
                   onTap: () {
+                    final taskQueue =
+                        Provider.of<TaskQueue>(context, listen: false);
+                    for (var file in getSelectedFiles()) {
+                      taskQueue
+                          .addTask(Download(file, '/sdcard/Download/$file'));
+                    }
                     _clearSelected();
                     _overlayEntry?.remove();
                     _overlayEntry = null;
@@ -163,20 +172,10 @@ class _PanFilePage extends State<PanFilePage> {
             IconButton(
               icon: const Icon(Icons.swap_vert_outlined),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return DownloadPage(
-                    items: [
-                      DownloadItem(
-                        title: 'File 1',
-                        subtitle: 'File 1 subtitle',
-                      ),
-                      DownloadItem(
-                        title: 'File 2',
-                        subtitle: 'File 2 subtitle',
-                      ),
-                    ],
-                  );
-                }));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DownloadPage()),
+                );
               },
             ),
           ],
@@ -217,9 +216,7 @@ class _PanFilePage extends State<PanFilePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showOverlay(context);
-        },
+        onPressed: () {},
         child: const Icon(Icons.add),
       ),
     );

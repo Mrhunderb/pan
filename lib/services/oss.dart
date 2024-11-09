@@ -86,7 +86,59 @@ class OssService {
     await minio.fGetObject(bucketName, objectName, path);
   }
 
-  static Future<void> downloadFileWithProgress(String objectName) async {}
+  static Future<void> fDownloadWithProgress(
+    String object,
+    String filePath,
+    Function(int, int) onProgress,
+  ) async {
+    MinioInvalidBucketNameError.check(bucketName);
+    MinioInvalidObjectNameError.check(object);
+
+    final stat = await minio.statObject(bucketName, object);
+    final dir = File(filePath).parent;
+    await dir.create(recursive: true);
+
+    final partFileName = '$filePath.${stat.etag}.part.minio';
+    final partFile = File(partFileName);
+    IOSink partFileStream;
+    var offset = 0;
+
+    Future<void> rename() async {
+      await partFile.rename(filePath);
+    }
+
+    if (await partFile.exists()) {
+      final localStat = await partFile.stat();
+      if (stat.size == localStat.size) {
+        onProgress(stat.size!, stat.size!); // 完成时触发100%进度
+        return await rename();
+      }
+      offset = localStat.size;
+      partFileStream = partFile.openWrite(mode: FileMode.append);
+    } else {
+      partFileStream = partFile.openWrite(mode: FileMode.write);
+    }
+
+    int bytesDownloaded = offset;
+    onProgress(bytesDownloaded, stat.size!);
+
+    final dataStream = await minio.getPartialObject(bucketName, object, offset);
+    await for (var chunk in dataStream) {
+      bytesDownloaded += chunk.length;
+      partFileStream.add(chunk);
+      onProgress(bytesDownloaded, stat.size!);
+    }
+
+    await partFileStream.close();
+
+    final localStat = await partFile.stat();
+    if (localStat.size != stat.size) {
+      print('Size mismatch between downloaded file and the object');
+      throw MinioError('Size mismatch between downloaded file and the object');
+    }
+
+    return rename();
+  }
 
   static Future<String> downloadFileInTemp(String objectName) async {
     Directory tempDir = await getTemporaryDirectory();
