@@ -2,6 +2,7 @@ import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:pan/screens/download.dart';
 import 'package:pan/services/oss.dart';
+import 'package:pan/widgets/confirm.dart';
 import 'package:pan/widgets/file_card.dart';
 import 'package:minio/models.dart';
 
@@ -75,11 +76,24 @@ class _PanFilePage extends State<PanFilePage> {
                   leading: const Icon(Icons.delete),
                   title: const Text('删除'),
                   onTap: () {
-                    OssService.deleteFiles(getSelectedFiles());
-                    _clearSelected();
-                    _overlayEntry?.remove();
-                    _overlayEntry = null;
-                    _loadFilesAndFolders();
+                    showDialog(
+                      context: context,
+                      builder: (context) => ConfirmDialog(
+                        title: '删除',
+                        content: '确认删除选中的文件吗？',
+                        onConfirm: () {
+                          Navigator.pop(context);
+                          OssService.deleteFiles(getSelectedFiles());
+                          _clearSelected();
+                          _overlayEntry?.remove();
+                          _overlayEntry = null;
+                          _loadFilesAndFolders();
+                        },
+                        onCancel: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    );
                   },
                 ),
                 ListTile(
