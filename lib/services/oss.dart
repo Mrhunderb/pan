@@ -56,8 +56,9 @@ class OssService {
   /// List all files in a bucket
   /// @param ?prefix
   /// @return List of files
-  static Future<List<Object>> listFiles([String? prefix]) async {
-    final stream = minio.listObjects(bucketName, prefix: prefix ?? '');
+  static Future<List<Object>> listFiles([String? prefix, bool? rec]) async {
+    final stream = minio.listObjects(bucketName,
+        prefix: prefix ?? '', recursive: rec ?? false);
     var objects = <Object>[];
     await for (var list in stream) {
       for (var object in list.objects) {
@@ -85,6 +86,8 @@ class OssService {
     await minio.fGetObject(bucketName, objectName, path);
   }
 
+  static Future<void> downloadFileWithProgress(String objectName) async {}
+
   static Future<String> downloadFileInTemp(String objectName) async {
     Directory tempDir = await getTemporaryDirectory();
     String path = '${tempDir.path}/$objectName';
@@ -94,5 +97,19 @@ class OssService {
 
   static Future<String> getFileUrl(String objectName) async {
     return minio.presignedGetObject(bucketName, objectName);
+  }
+
+  static Future<void> deleteFiles(List<String> files, String prefix) async {
+    for (var file in files) {
+      List<String> folders = await listFolders(prefix);
+      if (folders.contains(file)) {
+        List<Object> files = await listFiles(file, true);
+        for (var file in files) {
+          await minio.removeObject(bucketName, file.key!);
+        }
+        continue;
+      }
+      await minio.removeObject(bucketName, file);
+    }
   }
 }

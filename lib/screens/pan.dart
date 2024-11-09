@@ -83,7 +83,10 @@ class _PanFilePage extends State<PanFilePage> {
                         content: '确认删除选中的文件吗？',
                         onConfirm: () {
                           Navigator.pop(context);
-                          OssService.deleteFiles(getSelectedFiles());
+                          OssService.deleteFiles(
+                            getSelectedFiles(),
+                            widget.prefix,
+                          );
                           _clearSelected();
                           _overlayEntry?.remove();
                           _overlayEntry = null;
