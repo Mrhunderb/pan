@@ -57,3 +57,6 @@ minio相关设置在文件`lib/services/oss.dart`下
 ## 界面参考
 - 阿里云盘
 - 百度网盘
+
+## Git提交
+![git](res/git.png)
