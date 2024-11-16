@@ -22,25 +22,16 @@ minio相关设置在文件`lib/services/oss.dart`下
 下载文件路径为`path_provider`包提供，在我的机器上为`/storage/emulated/0/Android/data/com.example.pan/files/downloads`
 
 ## 效果展示
-<div style="display: flex; flex-wrap: wrap;">
-    <div style="flex: 1 0 30%; margin: 5px;">
-        <img src="res/home1.jpg" alt="Image 1" style="width: 100%;">
-    </div>
-    <div style="flex: 1 0 30%; margin: 5px;">
-        <img src="res/home2.jpg" alt="Image 1" style="width: 100%;">
-    </div>
-    <div style="flex: 1 0 30%; margin: 5px;">
-        <img src="res/picture_view.jpg" alt="Image 1" style="width: 100%;">
-    </div>
-    <div style="flex: 1 0 30%; margin: 5px;">
-        <img src="res/video_play.jpg" alt="Image 1" style="width: 100%;">
-    </div>
-    <div style="flex: 1 0 30%; margin: 5px;">
-        <img src="res/pdf_view.jpg" alt="Image 1" style="width: 100%;">
-    </div>
-    <div style="flex: 1 0 30%; margin: 5px;">
-        <img src="res/transfer.jpg" alt="Image 1" style="width: 100%;">
-    </div>
+<div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+    <img src="res/home1.jpg" alt="首页1" style="width: 30%;">
+    <img src="res/home2.jpg" alt="首页2" style="width: 30%;">
+    <img src="res/picture_view.jpg" alt="图片预览" style="width: 30%;">
+</div>
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="res/video_play.jpg" alt="视频播放" style="width: 30%;">
+    <img src="res/pdf_view.jpg" alt="pdf预览" style="width: 30%;">
+    <img src="res/transfer.jpg" alt="传输" style="width: 30%;">
 </div>
 
 ## 改进计划
@@ -57,6 +48,3 @@ minio相关设置在文件`lib/services/oss.dart`下
 ## 界面参考
 - 阿里云盘
 - 百度网盘
-
-## Git提交
-![git](res/git.png)
