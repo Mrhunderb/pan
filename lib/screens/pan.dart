@@ -165,7 +165,11 @@ class _PanFilePage extends State<PanFilePage> {
         throw Exception('Timeout while loading folders');
       },
     );
-    final downloadPath = await getDownloadsDirectory();
+    final downloadPath = await getDownloadsDirectory().onError(
+      (error, stackTrace) {
+        throw Exception('Failed to get download path');
+      },
+    );
 
     setState(() {
       _filesCache = files;
