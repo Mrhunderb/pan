@@ -14,48 +14,64 @@ class VideoView extends StatefulWidget {
 class _VideoViewState extends State<VideoView> {
   late VideoPlayerController _controller;
   late String _videoUrl;
+  late Future<void> _initialLoad;
 
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
+    _initialLoad = _initializeVideo();
   }
 
-  void _initializeVideo() async {
-    _controller = VideoPlayerController.networkUrl(Uri.parse(''))
-      ..initialize().then((_) {
-        setState(() {});
-      });
-    _videoUrl = await OssService.getFileUrl(widget.videoPath);
-    _controller = VideoPlayerController.networkUrl(Uri.parse(_videoUrl))
-      ..initialize().then((_) {
-        setState(() {});
-      });
+  Future<void> _initializeVideo() async {
+    try {
+      _videoUrl = await OssService.getFileUrl(widget.videoPath);
+
+      _controller = VideoPlayerController.networkUrl(Uri.parse(_videoUrl));
+      await _controller.initialize(); // Wait for initialization
+      setState(() {});
+    } catch (e) {
+      throw Exception('Failed to get video url or initialize video: $e');
+    }
   }
 
   @override
   void dispose() {
+    _controller.dispose(); // Dispose the controller only if it was initialized
     super.dispose();
-    _controller.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final videoName = widget.videoPath.split('/').last;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(videoName),
       ),
-      body: Center(
-        child: _controller.value.isInitialized
-            ? Chewie(
+      body: FutureBuilder<void>(
+        future: _initialLoad,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          // Ensure the controller is initialized before using it
+          if (_controller.value.isInitialized) {
+            return Center(
+              child: Chewie(
                 controller: ChewieController(
                   videoPlayerController: _controller,
                   autoPlay: true,
                   looping: true,
                 ),
-              )
-            : const CircularProgressIndicator(),
+              ),
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
       ),
     );
   }

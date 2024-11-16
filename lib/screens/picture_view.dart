@@ -23,18 +23,19 @@ class _PictureViewState extends State<PictureView> {
   }
 
   Future<void> _loadInitialData() async {
-    final picturePath = widget.picturePath;
-    final pictureName = picturePath.split('/').last;
-    final pictureUrl = await OssService.getFileUrl(picturePath).timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        throw Exception('Failed to get picture url');
-      },
-    );
-    setState(() {
-      this.pictureName = pictureName;
-      this.pictureUrl = pictureUrl;
-    });
+    try {
+      final picturePath = widget.picturePath;
+      final pictureName = picturePath.split('/').last;
+      final pictureUrl = await OssService.getFileUrl(picturePath).timeout(
+        const Duration(seconds: 10),
+      );
+      setState(() {
+        this.pictureName = pictureName;
+        this.pictureUrl = pictureUrl;
+      });
+    } catch (e) {
+      throw Exception('Failed to get picture url: $e');
+    }
   }
 
   @override
