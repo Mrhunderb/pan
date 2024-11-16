@@ -153,8 +153,18 @@ class _PanFilePage extends State<PanFilePage> {
 
   Future<void> _loadFilesAndFolders() async {
     // 获取文件和文件夹并缓存
-    final files = await OssService.listFiles(widget.prefix);
-    final folders = await OssService.listFolders(widget.prefix);
+    final files = await OssService.listFiles(widget.prefix).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        throw Exception('Timeout while loading files');
+      },
+    );
+    final folders = await OssService.listFolders(widget.prefix).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        throw Exception('Timeout while loading folders');
+      },
+    );
     final downloadPath = await getDownloadsDirectory();
 
     setState(() {
