@@ -13,11 +13,28 @@ class PictureView extends StatefulWidget {
 
 class _PictureViewState extends State<PictureView> {
   late final String pictureName;
+  late final String pictureUrl;
+  late Future<void> _initialLoad;
 
   @override
   void initState() {
     super.initState();
-    pictureName = widget.picturePath.split('/').last;
+    _initialLoad = _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    final picturePath = widget.picturePath;
+    final pictureName = picturePath.split('/').last;
+    final pictureUrl = await OssService.getFileUrl(picturePath).timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        throw Exception('Failed to get picture url');
+      },
+    );
+    setState(() {
+      this.pictureName = pictureName;
+      this.pictureUrl = pictureUrl;
+    });
   }
 
   @override
@@ -28,14 +45,13 @@ class _PictureViewState extends State<PictureView> {
       ),
       body: Center(
         child: FutureBuilder(
-          future: OssService.getFileUrl(widget.picturePath),
+          future: _initialLoad,
           builder: (context, futureSnapshot) {
             if (futureSnapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             } else if (futureSnapshot.hasError) {
               return Text('Error: ${futureSnapshot.error}');
             }
-            final pictureUrl = futureSnapshot.data as String;
             return PhotoView(
               imageProvider: NetworkImage(pictureUrl),
             );
